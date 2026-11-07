@@ -124,10 +124,28 @@ async function generate(prompt, key) {
   throw lastErr;
 }
 
-function buildPrompt(question, retrieved) {
+function buildPrompt(question, retrieved, profile) {
   const sources = retrieved
     .map((d, i) => "--- منبع " + (i + 1) + ": " + d.fa + " (" + d.en + ") ---\n" + d.text)
     .join("\n\n");
+  let profileBlock = "";
+  if (profile) {
+    const lines = [];
+    if (profile.name) lines.push("- نام: " + profile.name);
+    if (profile.age) lines.push("- سن: " + profile.age + " سال");
+    if (profile.gender) lines.push("- جنسیت: " + profile.gender);
+    if (profile.height) lines.push("- قد: " + profile.height + " سانتی‌متر");
+    if (profile.weight) lines.push("- وزن: " + profile.weight + " کیلوگرم");
+    if (profile.conditions) lines.push("- بیماری‌های زمینه‌ای: " + profile.conditions);
+    if (profile.meds) lines.push("- داروهای در حال مصرف: " + profile.meds);
+    if (profile.history) lines.push("- سابقه مصرف داروها: " + profile.history);
+    if (profile.addiction) lines.push("- اعتیاد: " + profile.addiction + (profile.addictionNote ? " (" + profile.addictionNote + ")" : ""));
+    if (lines.length) {
+      profileBlock =
+        "\n\nپروفایل کاربر:\n" + lines.join("\n") +
+        "\nاگر پروفایل کاربر داده شده، جواب را با آن شخصی‌سازی کن: سن و وزن را در توضیح دوز و عوارض در نظر بگیر؛ تداخل احتمالی با داروهای در حال مصرف را بررسی و هشدار بده؛ بیماری‌های زمینه‌ای و سابقه اعتیاد را در ارزیابی خطرات لحاظ کن؛ در صورت امکان کاربر را با نام صدا بزن. همچنان جواب اطلاعات عمومی است، نه نسخه‌ی شخصی، و برنامه‌ی دقیق با پزشک تنظیم می‌شود.";
+    }
+  }
   return (
     "تو یک دستیار دارویی هستی. به زبان فارسی پاسخ بده.\n" +
     "اول از منابع زیر استفاده کن و نام داروهایی که از آن‌ها استفاده کردی را در جواب ذکر کن.\n" +
@@ -140,8 +158,20 @@ function buildPrompt(question, retrieved) {
     "۴) در پایان بنویس که برنامه‌ی دقیق باید با پزشک معالج تنظیم شود و در چه مواردی باید فوراً به پزشک مراجعه کرد.\n" +
     "مهم: روش را به‌صورت اصل کلی و بازه‌های معمول توضیح بده، نه یک نسخه‌ی شخصی («تو باید فلان میلی‌گرم بخوری»). ارجاع به منبع را فقط وقتی بنویس که از آن مطمئنی؛ عنوان مقاله یا راهنما را از خودت نساز.\n" +
     "در پایان جواب، دقیقاً این جمله را اضافه کن: «" + DISCLAIMER + "»\n\n" +
-    "منابع:\n" + sources + "\n\nسؤال: " + question
+    "منابع:\n" + sources + profileBlock + "\n\nسؤال: " + question
   );
+}
+
+function sanitizeProfile(p) {
+  if (!p || typeof p !== "object") return null;
+  const out = {};
+  const fields = ["name", "age", "gender", "height", "weight", "conditions", "meds", "history", "addiction", "addictionNote"];
+  for (const f of fields) {
+    const v = p[f];
+    if (typeof v === "string" && v.trim()) out[f] = v.trim().slice(0, 200);
+    else if (typeof v === "number" && isFinite(v)) out[f] = v;
+  }
+  return Object.keys(out).length ? out : null;
 }
 
 function rateLimited(ip) {
@@ -184,6 +214,7 @@ export default {
     if (!question || question.length > 500) {
       return json({ error: "bad question" }, 400, origin, allowed);
     }
+    const profile = sanitizeProfile(body.profile);
     if (!env.GEMINI_API_KEY) {
       return json({ error: "no key configured" }, 500, origin, allowed);
     }
@@ -196,7 +227,7 @@ export default {
         .sort((a, b) => b.s - a.s)
         .slice(0, TOP_K)
         .map((x) => x.d);
-      let answer = await generate(buildPrompt(question, ranked), env.GEMINI_API_KEY);
+      let answer = await generate(buildPrompt(question, ranked, profile), env.GEMINI_API_KEY);
       let grounded = true;
       if (answer.includes(GENERAL_LABEL)) {
         grounded = false;
