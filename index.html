@@ -186,6 +186,7 @@
 const WORKER_URL = "https://darusim-ai.arivvvn.workers.dev";
 const CHAT_LS = "darusim-ai-chat-v1";
 const PROFILE_LS = "panah-profile-v1";
+const $ = (s) => document.querySelector(s);
 
 function loadProfile(){
   try { return JSON.parse(localStorage.getItem(PROFILE_LS) || "null"); } catch(e){ return null; }
@@ -258,7 +259,6 @@ refreshProfileBtn();
 
 let busy = false;
 
-const $ = (s) => document.querySelector(s);
 const chatEl = $("#chat"), qEl = $("#q"), sendBtn = $("#sendBtn");
 
 function escapeHtml(s){
