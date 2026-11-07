@@ -65,6 +65,10 @@
     border-radius:999px;padding:3px 11px;
   }
   .sources .lbl{font-size:12.5px;color:var(--faint);background:none;padding:3px 0}
+  .gk-tag{
+    display:inline-block;font-size:12.5px;color:#92400E;background:#FDF3E3;
+    border-radius:999px;padding:3px 11px;margin-bottom:10px;
+  }
   .retry{
     margin-top:12px;background:none;border:1px solid var(--line);border-radius:999px;
     color:var(--accent);font:inherit;font-size:13.5px;padding:6px 16px;cursor:pointer;
@@ -150,11 +154,15 @@ function md(src){
 function renderQA(item){
   const wrap = document.createElement("div");
   wrap.className = "qa";
+  const general = item.grounded === false;
+  const srcLabel = general ? "داروهای مرتبط:" : "منابع:";
   wrap.innerHTML =
     '<div class="q">' + escapeHtml(item.q) + "</div>" +
-    '<div class="a">' + md(item.a) +
+    '<div class="a">' +
+      (general ? '<div class="gk-tag">پاسخ بر اساس دانش عمومی پزشکی</div>' : "") +
+      md(item.a) +
       (item.sources && item.sources.length ?
-        '<div class="sources"><span class="lbl">منابع:</span>' +
+        '<div class="sources"><span class="lbl">' + srcLabel + '</span>' +
         item.sources.map(s => "<span>" + escapeHtml(s) + "</span>").join("") + "</div>" : "") +
     "</div>";
   return wrap;
@@ -219,7 +227,7 @@ async function ask(question){
       }
       return;
     }
-    const item = { q: question, a: data.answer, sources: data.sources || [] };
+    const item = { q: question, a: data.answer, sources: data.sources || [], grounded: data.grounded !== false };
     const items = loadChat();
     items.unshift(item);
     saveChat(items);

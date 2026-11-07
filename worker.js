@@ -13,6 +13,10 @@
 //   2. embed the question with gemini-embedding-001
 //   3. cosine retrieval, top 4
 //   4. generate the answer with gemini-3.5-flash, grounded in the sources
+//      when they cover the question; when they do not, the model answers
+//      from general medical knowledge and starts the answer with
+//      GENERAL_LABEL, so the client can show a "general knowledge" tag
+//      instead of presenting the retrieved drugs as the answer's sources.
 //
 // Abuse guard: 20 requests per minute per IP (best effort, per isolate).
 // If the key is ever abused, rotate it in AI Studio and update the Secret.
@@ -24,6 +28,7 @@ const GEN_MODEL = "gemini-3.5-flash";
 const DIMS = 768;
 const TOP_K = 4;
 const DISCLAIMER = "این اطلاعات صرفاً آموزشی است و جایگزین نظر پزشک یا داروساز نیست.";
+const GENERAL_LABEL = "در منابع داروسیم درباره‌ی این موضوع چیزی نیست؛ پاسخ زیر بر اساس دانش عمومی پزشکی است.";
 const RATE_LIMIT = 20;
 const WINDOW_MS = 60_000;
 
@@ -124,9 +129,11 @@ function buildPrompt(question, retrieved) {
     .map((d, i) => "--- منبع " + (i + 1) + ": " + d.fa + " (" + d.en + ") ---\n" + d.text)
     .join("\n\n");
   return (
-    "تو یک دستیار دارویی هستی. فقط بر اساس منابع زیر به سؤال جواب بده و به زبان فارسی پاسخ بده.\n" +
-    "اگر جواب در منابع نیست، صریح بگو که در منابع موجود نیست و حدس نزن.\n" +
-    "نام داروهایی که از آن‌ها استفاده کردی را در جواب ذکر کن.\n" +
+    "تو یک دستیار دارویی هستی. به زبان فارسی پاسخ بده.\n" +
+    "اول از منابع زیر استفاده کن و نام داروهایی که از آن‌ها استفاده کردی را در جواب ذکر کن.\n" +
+    "اگر جواب کامل سؤال در منابع نیست، از دانش عمومی پزشکی خودت جواب بده، اما اول جواب را دقیقاً با این جمله شروع کن: «" + GENERAL_LABEL + "»\n" +
+    "در این حالت فقط اطلاعات پزشکی عمومی و پذیرفته‌شده را بگو و در مورد دوز، قطع مصرف یا تغییر دارو حدس نزن.\n" +
+    "اگر سؤال درباره‌ی قطع مصرف، کم‌کردن دوز یا تغییر دارو است، حتماً در جواب بنویس که این کار باید تدریجی و زیر نظر پزشک معالج انجام شود و قطع ناگهانی خطرناک است.\n" +
     "در پایان جواب، دقیقاً این جمله را اضافه کن: «" + DISCLAIMER + "»\n\n" +
     "منابع:\n" + sources + "\n\nسؤال: " + question
   );
@@ -185,8 +192,15 @@ export default {
         .slice(0, TOP_K)
         .map((x) => x.d);
       let answer = await generate(buildPrompt(question, ranked), env.GEMINI_API_KEY);
+      let grounded = true;
+      if (answer.includes(GENERAL_LABEL)) {
+        grounded = false;
+        if (answer.startsWith(GENERAL_LABEL)) {
+          answer = answer.slice(GENERAL_LABEL.length).replace(/^\s+/, "");
+        }
+      }
       if (!answer.includes("صرفاً آموزشی")) answer += "\n\n" + DISCLAIMER;
-      return json({ answer, sources: ranked.map((d) => d.fa) }, 200, origin, allowed);
+      return json({ answer, sources: ranked.map((d) => d.fa), grounded }, 200, origin, allowed);
     } catch (e) {
       console.error(e);
       const status = e.status === 429 || e.status === 503 ? 503 : 500;
