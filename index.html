@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>داروسیم AI — دستیار دارویی</title>
+<title>پناه — دستیار دارویی</title>
 <style>
   @font-face{font-family:'AbarHigh';src:url('fonts/AbarHigh-Regular.woff') format('woff');font-weight:400;font-display:swap}
   @font-face{font-family:'AbarHigh';src:url('fonts/AbarHigh-SemiBold.woff') format('woff');font-weight:600;font-display:swap}
@@ -11,8 +11,8 @@
   @font-face{font-family:'AbarHigh';src:url('fonts/AbarHigh-ExtraBold.woff') format('woff');font-weight:800;font-display:swap}
   *{box-sizing:border-box;margin:0;padding:0}
   :root{
-    --bg:#FAFAF7; --ink:#16161A; --muted:#6E6E73; --faint:#9A9A9E;
-    --line:#E8E6E1; --card:#FFFFFF; --accent:#0F766E; --accent-soft:#E6F2F0;
+    --bg:#FBF6EC; --ink:#1E2A38; --muted:#5E6B7A; --faint:#9AA7B4;
+    --line:#E9E2D3; --card:#FFFFFF; --accent:#5B9BD5; --accent-soft:#E1F0FA;
     --danger:#B3261E;
   }
   html{-webkit-text-size-adjust:100%}
@@ -25,7 +25,6 @@
 
   header{margin-bottom:28px}
   h1{font-size:26px;font-weight:800;line-height:1.4;letter-spacing:-.01em}
-  h1 span{color:var(--accent)}
   header p{color:var(--muted);font-size:14px;line-height:1.8;margin-top:2px}
 
   #composer{display:flex;gap:8px;align-items:flex-end}
@@ -91,8 +90,8 @@
 <body>
 <main>
   <header>
-    <h1>داروسیم <span>AI</span></h1>
-    <p>دستیار دارویی — پاسخ از ۲۴۱ دارو، با ذکر منبع</p>
+    <h1>پناه</h1>
+    <p>دستیار دارویی — پناه سؤال‌های دارویی‌ات</p>
   </header>
 
   <form id="composer">
@@ -108,7 +107,7 @@
 
   <div id="chat"></div>
 
-  <p class="foot">پاسخ‌ها فقط از داده‌های داروسیم ساخته می‌شوند و جایگزین نظر پزشک یا داروساز نیستند.<br><button type="button" id="clearChat">پاک کردن گفتگو</button></p>
+  <p class="foot">پاسخ‌ها جایگزین نظر پزشک یا داروساز نیستند.<br><button type="button" id="clearChat">پاک کردن گفتگو</button></p>
 </main>
 
 <script>
