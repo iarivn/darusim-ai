@@ -211,6 +211,8 @@
   }
   .a p{margin-bottom:10px}
   .a p:last-child{margin-bottom:0}
+  .a .md-h{font-weight:800;font-size:17px;margin:14px 0 6px}
+  .a hr.md-hr{border:none;border-top:1px solid var(--line);margin:14px 0}
   .a ul,.a ol{margin:0 20px 10px 0;padding:0}
   .a li{margin-bottom:4px}
   .a .disclaimer{color:var(--muted);font-size:13.5px;border-top:1px solid var(--line);padding-top:10px;margin-top:14px}
@@ -576,6 +578,9 @@ function md(src){
   for (const raw of lines){
     const line = raw.trim();
     if (!line){ closeList(); continue; }
+    if (/^(-{3,}|\*{3,}|_{3,})$/.test(line)){ closeList(); html += '<hr class="md-hr">'; continue; }
+    const hd = line.match(/^#{1,6}\s+(.+)$/);
+    if (hd){ closeList(); html += '<p class="md-h">' + hd[1] + "</p>"; continue; }
     const ul = line.match(/^(?:[-*•])\s+(.+)$/);
     const ol = line.match(/^([\d۰-۹٠-٩]+)[.)]\s+(.+)$/);
     if (ul){
