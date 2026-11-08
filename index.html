@@ -20,22 +20,42 @@
   body{
     background:var(--bg); color:var(--ink);
     font-family:'AbarHigh',system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;
-    font-size:17px; line-height:1.9; min-height:100vh;
+    font-size:17px; line-height:1.9; min-height:100vh; overflow-x:hidden;
   }
-  main{max-width:640px;margin:0 auto;padding:28px 20px 64px}
+  main{max-width:640px;margin:0 auto;padding:28px 20px 64px;position:relative;z-index:1}
 
-  header{position:relative;margin-bottom:28px}
+  /* ---- Ambient background blobs (soft radial gradients, no blur) ---- */
+  .blob{position:fixed;border-radius:50%;pointer-events:none;z-index:0}
+  .blob-a{
+    width:440px;height:440px;top:-140px;right:-120px;
+    background:radial-gradient(circle,rgba(91,155,213,.18),transparent 70%);
+    animation:driftA 26s ease-in-out infinite;
+  }
+  .blob-b{
+    width:380px;height:380px;bottom:-160px;left:-100px;
+    background:radial-gradient(circle,rgba(232,196,122,.20),transparent 70%);
+    animation:driftB 32s ease-in-out infinite;
+  }
+
+  header{position:relative;margin-bottom:28px;animation:fadeUp .7s cubic-bezier(.2,.9,.3,1) both}
   .profile-icon-btn{
     position:absolute;top:0;left:0;width:44px;height:44px;border-radius:50%;
     border:1px solid var(--line);background:var(--card);color:var(--accent);
     display:flex;align-items:center;justify-content:center;cursor:pointer;
+    animation:popIn .6s .1s cubic-bezier(.2,.9,.3,1.2) both;
   }
   .profile-icon-btn:hover{border-color:var(--accent)}
   .profile-icon-btn svg{width:24px;height:24px;display:block}
+  .profile-icon-btn.needs-profile::after{
+    content:"";position:absolute;inset:-4px;border-radius:50%;
+    border:1.5px solid var(--accent);opacity:0;
+    animation:ringPulse 3s ease-out infinite;
+  }
+  .profile-icon-btn.icon-swap svg{animation:iconPop .45s cubic-bezier(.2,.9,.3,1.4) both}
   h1{font-size:26px;font-weight:800;line-height:1.4;letter-spacing:-.01em}
   header p{color:var(--muted);font-size:14px;line-height:1.8;margin-top:2px}
 
-  #composer{display:flex;gap:8px;align-items:flex-end}
+  #composer{display:flex;gap:8px;align-items:flex-end;animation:fadeUp .7s .15s cubic-bezier(.2,.9,.3,1) both}
   #composer textarea{
     flex:1;min-width:0;resize:none;border:1px solid var(--line);border-radius:14px;
     background:var(--card);padding:13px 16px;font:inherit;font-size:16px;line-height:1.8;
@@ -52,7 +72,11 @@
   #examples button{
     background:none;border:1px solid var(--line);border-radius:999px;
     color:var(--muted);font:inherit;font-size:13.5px;padding:6px 14px;cursor:pointer;
+    animation:fadeUp .5s both;
   }
+  #examples button:nth-child(1){animation-delay:.3s}
+  #examples button:nth-child(2){animation-delay:.4s}
+  #examples button:nth-child(3){animation-delay:.5s}
   #examples button:hover{border-color:var(--accent);color:var(--accent)}
 
   #femaleSection{
@@ -68,6 +92,7 @@
   #profilePanel{
     background:var(--card);border:1px solid var(--line);border-radius:14px;
     padding:18px 20px;margin-bottom:20px;
+    animation:panelIn .45s cubic-bezier(.2,.9,.3,1.05) both;
   }
   #profilePanel h2{font-size:18px;font-weight:700;margin-bottom:4px}
   .profile-note{font-size:13.5px;color:var(--muted);line-height:1.8;margin-bottom:6px}
@@ -89,10 +114,12 @@
   .onboard-overlay{
     position:fixed;inset:0;background:rgba(30,42,56,.45);z-index:50;
     display:flex;align-items:center;justify-content:center;padding:20px;
+    animation:fadeIn .3s both;
   }
   .onboard-card{
     background:var(--card);border:1px solid var(--line);border-radius:18px;
     max-width:420px;width:100%;padding:24px;text-align:center;
+    animation:popIn .5s cubic-bezier(.2,.9,.3,1.15) both;
   }
   .onboard-card h2{font-size:20px;font-weight:800;margin-bottom:8px}
   .onboard-card p{font-size:15px;color:var(--muted);line-height:1.9;margin-bottom:6px}
@@ -101,7 +128,7 @@
   #onboardGo{border:none;background:var(--accent);color:#fff;font-weight:700}
   #onboardLater{background:none;border:1px solid var(--line);color:var(--muted)}
 
-  .qa{margin-top:28px}
+  .qa{margin-top:28px;animation:fadeUp .55s cubic-bezier(.2,.9,.25,1.05) both}
   .q{font-weight:700;font-size:18px;line-height:1.8;margin-bottom:10px}
   .a{
     background:var(--card);border:1px solid var(--line);border-radius:14px;
@@ -112,7 +139,7 @@
   .a ul,.a ol{margin:0 20px 10px 0;padding:0}
   .a li{margin-bottom:4px}
   .a .disclaimer{color:var(--muted);font-size:13.5px;border-top:1px solid var(--line);padding-top:10px;margin-top:14px}
-  .sources{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+  .sources{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;animation:fadeUp .5s .15s both}
   .sources span{
     font-size:12.5px;color:var(--accent);background:var(--accent-soft);
     border-radius:999px;padding:3px 11px;
@@ -128,13 +155,32 @@
   }
   .err{color:var(--danger);font-size:15px}
   .loading{color:var(--muted);font-size:15px}
-  .loading i{font-style:normal;animation:pulse 1.4s ease-in-out infinite}
+  .loading i{font-style:normal;display:inline-block;animation:dotBounce 1.2s ease-in-out infinite}
   .loading i:nth-child(2){animation-delay:.2s}
   .loading i:nth-child(3){animation-delay:.4s}
-  @keyframes pulse{0%,100%{opacity:.25}50%{opacity:1}}
+  @keyframes dotBounce{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-4px);opacity:1}}
 
-  .foot{margin-top:40px;font-size:13px;color:var(--faint);line-height:1.9;text-align:center}
+  .foot{margin-top:40px;font-size:13px;color:var(--faint);line-height:1.9;text-align:center;animation:fadeIn 1s .6s both}
   .foot button{background:none;border:none;color:var(--faint);font:inherit;font-size:13px;cursor:pointer;text-decoration:underline}
+
+  /* ---- Tactile press on every button (transform only) ---- */
+  button{transition:transform .15s ease}
+  button:active{transform:scale(.96)}
+  .profile-icon-btn:active{transform:scale(.9)}
+
+  /* ---- Keyframes (transform / opacity only) ---- */
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes popIn{0%{opacity:0;transform:scale(.92) translateY(10px)}60%{opacity:1;transform:scale(1.02) translateY(0)}100%{opacity:1;transform:scale(1) translateY(0)}}
+  @keyframes panelIn{from{opacity:0;transform:translateY(-8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+  @keyframes driftA{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-30px) scale(1.12)}}
+  @keyframes driftB{0%,100%{transform:translate(0,0) scale(1.05)}50%{transform:translate(-50px,25px) scale(.95)}}
+  @keyframes ringPulse{0%{opacity:.55;transform:scale(.9)}70%{opacity:0;transform:scale(1.3)}100%{opacity:0;transform:scale(1.3)}}
+  @keyframes iconPop{0%{transform:scale(.6);opacity:.4}60%{transform:scale(1.12);opacity:1}100%{transform:scale(1);opacity:1}}
+
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  }
   @media (max-width:480px){
     main{padding:22px 16px 56px}
     h1{font-size:23px}
@@ -142,6 +188,8 @@
 </style>
 </head>
 <body>
+<div class="blob blob-a" aria-hidden="true"></div>
+<div class="blob blob-b" aria-hidden="true"></div>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <symbol id="icon-person-neutral" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -291,6 +339,11 @@ function refreshProfileIcon(){
   const g = p && p.gender;
   const id = g === "مرد" ? "#icon-person-male" : g === "زن" ? "#icon-person-female" : "#icon-person-neutral";
   $("#profileIconUse").setAttribute("href", id);
+  const btn = $("#profileBtn");
+  btn.classList.toggle("needs-profile", !(p && Object.keys(p).length));
+  btn.classList.remove("icon-swap");
+  void btn.offsetWidth;
+  btn.classList.add("icon-swap");
 }
 function toggleFemaleSection(){
   $("#femaleSection").hidden = $("#pf-gender").value !== "زن";
