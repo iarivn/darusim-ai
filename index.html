@@ -20,9 +20,66 @@
   body{
     background:var(--bg); color:var(--ink);
     font-family:'AbarHigh',system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;
-    font-size:17px; line-height:1.9; min-height:100vh; overflow-x:hidden;
+    font-size:17px; line-height:1.9; height:100dvh; overflow:hidden;
   }
-  main{max-width:640px;margin:0 auto;padding:28px 20px 64px;position:relative;z-index:1}
+  .app{display:flex;height:100dvh;position:relative;z-index:1}
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;height:100dvh;position:relative}
+
+  /* ---- Sidebar (chat history, ChatGPT-style) ---- */
+  #sidebar{
+    width:280px;flex:none;height:100dvh;background:#F3EBD8;
+    border-inline-end:1px solid var(--line);
+    display:flex;flex-direction:column;padding:14px 12px;overflow:hidden;
+  }
+  .side-top{display:flex;gap:8px;align-items:center}
+  #newChatBtn{
+    flex:1;border:1px solid var(--line);background:var(--card);border-radius:12px;
+    font:inherit;font-size:14.5px;font-weight:700;color:var(--ink);
+    padding:10px 14px;cursor:pointer;text-align:start;
+  }
+  #newChatBtn:hover{border-color:var(--accent);color:var(--accent)}
+  #closeSidebarBtn{
+    display:none;flex:none;width:36px;height:36px;border:none;background:none;
+    color:var(--muted);border-radius:50%;font-size:16px;cursor:pointer;
+    align-items:center;justify-content:center;
+  }
+  .side-label{font-size:12.5px;color:var(--faint);margin:18px 6px 8px}
+  #historyList{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:2px;min-height:0}
+  .hist-item{
+    display:flex;align-items:center;gap:6px;padding:9px 10px;border-radius:10px;
+    cursor:pointer;font-size:14.5px;color:var(--ink);
+  }
+  .hist-item:hover{background:rgba(91,155,213,.10)}
+  .hist-item.active{background:var(--accent-soft)}
+  .hist-title{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hist-del{
+    flex:none;width:26px;height:26px;border:none;background:none;color:var(--faint);
+    cursor:pointer;border-radius:50%;font-size:13px;display:none;
+    align-items:center;justify-content:center;
+  }
+  .hist-item:hover .hist-del{display:flex}
+  .hist-del:hover{color:var(--danger);background:rgba(179,38,30,.08)}
+  .hist-empty{font-size:13.5px;color:var(--faint);padding:6px 10px}
+  .side-foot{font-size:12px;color:var(--faint);text-align:center;padding-top:12px;border-top:1px solid var(--line)}
+  #sidebarBackdrop{
+    position:fixed;inset:0;background:rgba(30,42,56,.35);z-index:35;
+    opacity:0;pointer-events:none;transition:opacity .3s ease;
+  }
+  body.sidebar-hidden #sidebar{display:none}
+
+  /* ---- Chat scroll area + welcome (empty state) ---- */
+  .chat-scroll{flex:1;overflow-y:auto;padding:12px 20px 24px;min-height:0}
+  .chat-inner{max-width:768px;margin:0 auto}
+  .welcome{max-width:640px;margin:0 auto;padding:15vh 8px 0;text-align:center;animation:fadeUp .7s .1s cubic-bezier(.2,.9,.3,1) both}
+  .welcome h2{font-size:32px;font-weight:800;line-height:1.4}
+  .welcome p{color:var(--muted);font-size:15px;margin-top:4px}
+
+  /* ---- Composer dock (pinned to the bottom, ChatGPT-style) ---- */
+  .composer-dock{flex:none;padding:12px 20px calc(14px + env(safe-area-inset-bottom));background:var(--bg)}
+  .composer-note{max-width:768px;margin:8px auto 0;font-size:12px;color:var(--faint);line-height:1.8;text-align:center}
+
+  /* ---- Profile panel as a centered overlay ---- */
+  #profileBackdrop{position:fixed;inset:0;background:rgba(30,42,56,.35);z-index:55}
 
   /* ---- Ambient background blobs (soft radial gradients, no blur) ---- */
   .blob{position:fixed;border-radius:50%;pointer-events:none;z-index:0}
@@ -37,9 +94,20 @@
     animation:driftB 32s ease-in-out infinite;
   }
 
-  header{position:relative;margin-bottom:28px;animation:fadeUp .7s cubic-bezier(.2,.9,.3,1) both}
+  header{
+    position:relative;display:flex;align-items:center;gap:10px;flex:none;
+    padding:12px 16px;border-bottom:1px solid var(--line);
+    animation:fadeUp .7s cubic-bezier(.2,.9,.3,1) both;
+  }
+  .menu-btn{
+    flex:none;width:40px;height:40px;border:none;background:none;color:var(--muted);
+    border-radius:50%;font-size:19px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .menu-btn:hover{background:rgba(91,155,213,.10);color:var(--accent)}
+  .head-titles{min-width:0}
   .profile-icon-btn{
-    position:absolute;top:0;left:0;width:44px;height:44px;border-radius:50%;
+    position:static;flex:none;margin-inline-start:auto;width:44px;height:44px;border-radius:50%;
     border:1px solid var(--line);background:var(--card);color:var(--accent);
     display:flex;align-items:center;justify-content:center;cursor:pointer;
     animation:popIn .6s .1s cubic-bezier(.2,.9,.3,1.2) both;
@@ -52,8 +120,8 @@
     animation:ringPulse 3s ease-out infinite;
   }
   .profile-icon-btn.icon-swap svg{animation:iconPop .45s cubic-bezier(.2,.9,.3,1.4) both}
-  h1{font-size:26px;font-weight:800;line-height:1.4;letter-spacing:-.01em}
-  header p{color:var(--muted);font-size:14px;line-height:1.8;margin-top:2px}
+  h1{font-size:20px;font-weight:800;line-height:1.4;letter-spacing:-.01em}
+  header p{color:var(--muted);font-size:12.5px;line-height:1.6;margin-top:0}
 
   #composer{display:flex;gap:8px;align-items:flex-end;animation:fadeUp .7s .15s cubic-bezier(.2,.9,.3,1) both}
   #composer textarea{
@@ -68,7 +136,7 @@
   }
   #composer button:disabled{opacity:.45;cursor:default}
 
-  #examples{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 8px}
+  #examples{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:20px 0 0}
   #examples button{
     background:none;border:1px solid var(--line);border-radius:999px;
     color:var(--muted);font:inherit;font-size:13.5px;padding:6px 14px;cursor:pointer;
@@ -90,8 +158,10 @@
   }
   #profilePanel .ovarian-checks input{width:auto;accent-color:var(--accent)}
   #profilePanel{
+    position:fixed;inset:0;margin:auto;width:min(480px,calc(100vw - 32px));
+    height:fit-content;max-height:86dvh;overflow-y:auto;z-index:60;
     background:var(--card);border:1px solid var(--line);border-radius:14px;
-    padding:18px 20px;margin-bottom:20px;
+    padding:18px 20px;
     animation:panelIn .45s cubic-bezier(.2,.9,.3,1.05) both;
   }
   #profilePanel h2{font-size:18px;font-weight:700;margin-bottom:4px}
@@ -128,8 +198,13 @@
   #onboardGo{border:none;background:var(--accent);color:#fff;font-weight:700}
   #onboardLater{background:none;border:1px solid var(--line);color:var(--muted)}
 
-  .qa{margin-top:28px;animation:fadeUp .55s cubic-bezier(.2,.9,.25,1.05) both}
-  .q{font-weight:700;font-size:18px;line-height:1.8;margin-bottom:10px}
+  .qa{margin-top:24px;animation:fadeUp .55s cubic-bezier(.2,.9,.25,1.05) both}
+  .qa:first-child{margin-top:4px}
+  .q{
+    width:fit-content;max-width:85%;margin-inline-start:auto;
+    background:var(--accent-soft);border-radius:16px;padding:10px 16px;
+    font-weight:700;font-size:17px;line-height:1.8;margin-bottom:12px;
+  }
   .a{
     background:var(--card);border:1px solid var(--line);border-radius:14px;
     padding:18px 20px;font-size:16.5px;
@@ -160,9 +235,6 @@
   .loading i:nth-child(3){animation-delay:.4s}
   @keyframes dotBounce{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-4px);opacity:1}}
 
-  .foot{margin-top:40px;font-size:13px;color:var(--faint);line-height:1.9;text-align:center;animation:fadeIn 1s .6s both}
-  .foot button{background:none;border:none;color:var(--faint);font:inherit;font-size:13px;cursor:pointer;text-decoration:underline}
-
   /* ---- Tactile press on every button (transform only) ---- */
   button{transition:transform .15s ease}
   button:active{transform:scale(.96)}
@@ -181,9 +253,24 @@
   @media (prefers-reduced-motion: reduce){
     *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
   }
+  @media (max-width:768px){
+    #sidebar{
+      position:fixed;top:0;bottom:0;inset-inline-start:0;z-index:40;
+      transform:translateX(105%);transition:transform .3s ease;
+      box-shadow:-8px 0 24px rgba(30,42,56,.12);
+    }
+    body.sidebar-hidden #sidebar{display:flex}
+    body.sidebar-open #sidebar{transform:translateX(0)}
+    body.sidebar-open #sidebarBackdrop{opacity:1;pointer-events:auto}
+    #closeSidebarBtn{display:flex}
+    .hist-del{display:flex}
+    .chat-scroll{padding:8px 14px 20px}
+    .composer-dock{padding:10px 14px calc(12px + env(safe-area-inset-bottom))}
+    .welcome{padding-top:12vh}
+  }
   @media (max-width:480px){
-    main{padding:22px 16px 56px}
-    h1{font-size:23px}
+    h1{font-size:19px}
+    .welcome h2{font-size:27px}
   }
 </style>
 </head>
@@ -209,15 +296,29 @@
     </symbol>
   </defs>
 </svg>
-<main>
+<div class="app">
+  <aside id="sidebar">
+    <div class="side-top">
+      <button type="button" id="newChatBtn">＋ چت جدید</button>
+      <button type="button" id="closeSidebarBtn" aria-label="بستن منو">✕</button>
+    </div>
+    <div class="side-label">تاریخچه‌ی چت‌ها</div>
+    <nav id="historyList" aria-label="تاریخچه‌ی چت‌ها"></nav>
+    <div class="side-foot">پناه — دستیار دارویی</div>
+  </aside>
+  <div class="main">
   <header>
+    <button type="button" class="menu-btn" id="menuBtn" aria-label="منو">☰</button>
+    <div class="head-titles">
+      <h1>پناه</h1>
+      <p>دستیار دارویی — پناه سؤال‌های دارویی‌ات</p>
+    </div>
     <button type="button" class="profile-icon-btn" id="profileBtn" aria-label="پروفایل من">
       <svg aria-hidden="true"><use id="profileIconUse" href="#icon-person-neutral"/></svg>
     </button>
-    <h1>پناه</h1>
-    <p>دستیار دارویی — پناه سؤال‌های دارویی‌ات</p>
   </header>
 
+  <div id="profileBackdrop" hidden></div>
   <div id="profilePanel" hidden>
     <h2>پروفایل من</h2>
     <p class="profile-note">این اطلاعات فقط روی همین دستگاه ذخیره می‌شود و همراه هر سؤال — برای شخصی‌سازی جواب — به سرویس هوش مصنوعی فرستاده می‌شود. پر کردن همه‌ی فیلدها اجباری نیست.</p>
@@ -289,21 +390,31 @@
     <p id="profileSaved" hidden>پروفایل شما ذخیره شد.</p>
   </div>
 
-  <form id="composer">
-    <textarea id="q" rows="1" placeholder="سؤالت را بپرس…" aria-label="سؤال دارویی"></textarea>
-    <button type="submit" id="sendBtn">ارسال</button>
-  </form>
-
-  <div id="examples">
-    <button type="button" data-q="ناپروکسن برای درد قاعدگی خوبه؟">ناپروکسن برای درد قاعدگی؟</button>
-    <button type="button" data-q="سلکوکسیب برای کی مناسبه؟">سلکوکسیب برای کی مناسبه؟</button>
-    <button type="button" data-q="متفورمین چطور کار می‌کنه؟">متفورمین چطور کار می‌کنه؟</button>
+  <div class="chat-scroll" id="chatScroll">
+    <div class="chat-inner">
+      <div id="welcome" class="welcome">
+        <h2>پناه</h2>
+        <p>چطور می‌تونم کمکت کنم؟</p>
+        <div id="examples">
+          <button type="button" data-q="ناپروکسن برای درد قاعدگی خوبه؟">ناپروکسن برای درد قاعدگی؟</button>
+          <button type="button" data-q="سلکوکسیب برای کی مناسبه؟">سلکوکسیب برای کی مناسبه؟</button>
+          <button type="button" data-q="متفورمین چطور کار می‌کنه؟">متفورمین چطور کار می‌کنه؟</button>
+        </div>
+      </div>
+      <div id="chat"></div>
+    </div>
   </div>
 
-  <div id="chat"></div>
-
-  <p class="foot">این اپلیکیشن صرفاً یک دستیار در ابتدای تصمیم‌گیری برای مصرف دارو، ترک دارو یا کسب اطلاعات درباره‌ی داروها و مسائل پزشکی است و به هیچ عنوان نمی‌تواند تنها مرجع تصمیم‌گیری شما در این موضوع باشد. حتماً تمام نتایج را با یک پزشک — حتی به‌صورت تلفنی یا متنی — در میان بگذارید و از او تأیید بگیرید.<br><button type="button" id="clearChat">پاک کردن گفتگو</button></p>
-</main>
+  <div class="composer-dock">
+    <form id="composer">
+      <textarea id="q" rows="1" placeholder="سؤالت را بپرس…" aria-label="سؤال دارویی"></textarea>
+      <button type="submit" id="sendBtn">ارسال</button>
+    </form>
+    <p class="composer-note">این اپلیکیشن صرفاً یک دستیار در ابتدای تصمیم‌گیری برای مصرف دارو، ترک دارو یا کسب اطلاعات درباره‌ی داروها و مسائل پزشکی است و به هیچ عنوان نمی‌تواند تنها مرجع تصمیم‌گیری شما در این موضوع باشد. حتماً تمام نتایج را با یک پزشک — حتی به‌صورت تلفنی یا متنی — در میان بگذارید و از او تأیید بگیرید.</p>
+  </div>
+  </div>
+</div>
+<div id="sidebarBackdrop"></div>
 
 <div class="onboard-overlay" id="onboardOverlay" hidden>
   <div class="onboard-card" role="dialog" aria-modal="true" aria-labelledby="onboardTitle">
@@ -320,7 +431,9 @@
 "use strict";
 // آدرس ورکر Cloudflare
 const WORKER_URL = "https://darusim-ai.arivvvn.workers.dev";
-const CHAT_LS = "darusim-ai-chat-v1";
+const CHATS_LS = "panah-chats-v1";
+const ACTIVE_LS = "panah-active-chat-v1";
+const OLD_CHAT_LS = "darusim-ai-chat-v1";
 const PROFILE_LS = "panah-profile-v1";
 const $ = (s) => document.querySelector(s);
 
@@ -402,11 +515,20 @@ function readProfileForm(){
   }
   return p;
 }
-$("#profileBtn").addEventListener("click", () => {
+function openProfilePanel(){
   fillProfileForm();
-  $("#profilePanel").hidden = !$("#profilePanel").hidden;
+  $("#profilePanel").hidden = false;
+  $("#profileBackdrop").hidden = false;
+}
+function closeProfilePanel(){
+  $("#profilePanel").hidden = true;
+  $("#profileBackdrop").hidden = true;
+}
+$("#profileBtn").addEventListener("click", () => {
+  if ($("#profilePanel").hidden) openProfilePanel(); else closeProfilePanel();
 });
-$("#closeProfile").addEventListener("click", () => { $("#profilePanel").hidden = true; });
+$("#closeProfile").addEventListener("click", closeProfilePanel);
+$("#profileBackdrop").addEventListener("click", closeProfilePanel);
 $("#pf-gender").addEventListener("change", toggleFemaleSection);
 $("#saveProfile").addEventListener("click", () => {
   localStorage.setItem(PROFILE_LS, JSON.stringify(readProfileForm()));
@@ -431,9 +553,7 @@ refreshProfileIcon();
 })();
 $("#onboardGo").addEventListener("click", () => {
   $("#onboardOverlay").hidden = true;
-  fillProfileForm();
-  $("#profilePanel").hidden = false;
-  $("#profilePanel").scrollIntoView({ behavior: "smooth", block: "start" });
+  openProfilePanel();
 });
 $("#onboardLater").addEventListener("click", () => {
   $("#onboardOverlay").hidden = true;
@@ -490,23 +610,141 @@ function renderQA(item){
   return wrap;
 }
 
-function loadChat(){
-  try { return JSON.parse(localStorage.getItem(CHAT_LS) || "[]"); } catch(e){ return []; }
+// ---- Multi-chat store (ChatGPT-style: sidebar history + fresh chat on entry) ----
+function loadChats(){
+  try { return JSON.parse(localStorage.getItem(CHATS_LS) || "[]"); } catch(e){ return []; }
 }
-function saveChat(items){
-  localStorage.setItem(CHAT_LS, JSON.stringify(items.slice(0, 20)));
+function saveChats(chats){
+  localStorage.setItem(CHATS_LS, JSON.stringify(chats.slice(0, 30)));
+}
+function chatTitle(q){
+  const t = (q || "").trim();
+  return t.length > 30 ? t.slice(0, 30) + "…" : (t || "چت جدید");
+}
+function migrateOldChat(){
+  if (localStorage.getItem(CHATS_LS)) return;
+  let old = [];
+  try { old = JSON.parse(localStorage.getItem(OLD_CHAT_LS) || "[]"); } catch(e){ old = []; }
+  if (!old.length) return;
+  const msgs = old.slice().reverse(); // old chat was stored newest-first
+  const firstQ = msgs[0] && msgs[0].q ? msgs[0].q : "گفتگوی قبلی";
+  const chat = { id: "migrated-" + Date.now(), title: chatTitle(firstQ), createdAt: Date.now(), updatedAt: Date.now(), messages: msgs.slice(-20) };
+  saveChats([chat]);
+  localStorage.removeItem(OLD_CHAT_LS);
+}
+let activeChatId = null;
+function activeChat(){
+  return loadChats().find(c => c.id === activeChatId) || null;
+}
+function setActiveChat(id){
+  activeChatId = id;
+  try { localStorage.setItem(ACTIVE_LS, id); } catch(e){}
+}
+function saveActiveChat(chat){
+  const chats = loadChats();
+  const i = chats.findIndex(c => c.id === chat.id);
+  if (i >= 0) chats[i] = chat; else chats.unshift(chat);
+  saveChats(chats);
+}
+function newChat(){
+  const chat = { id: "c" + Date.now(), title: "چت جدید", createdAt: Date.now(), updatedAt: Date.now(), messages: [] };
+  const chats = loadChats();
+  chats.unshift(chat);
+  saveChats(chats);
+  setActiveChat(chat.id);
+  return chat;
+}
+function startFreshChat(){
+  // On entry always open a fresh empty chat; past chats live in the sidebar.
+  const chats = loadChats();
+  const empty = chats.find(c => c.messages && !c.messages.length);
+  if (empty){ setActiveChat(empty.id); return empty; }
+  return newChat();
+}
+function openChat(id){
+  const chat = loadChats().find(c => c.id === id);
+  if (!chat) return;
+  setActiveChat(id);
+  renderAll();
+  closeSidebarMobile();
+}
+function deleteChat(id){
+  if (!confirm("این چت حذف شود؟")) return;
+  const chats = loadChats().filter(c => c.id !== id);
+  saveChats(chats);
+  if (activeChatId === id) startFreshChat();
+  renderAll();
+}
+function closeSidebarMobile(){
+  document.body.classList.remove("sidebar-open");
+}
+function scrollChatToBottom(){
+  const sc = $("#chatScroll");
+  sc.scrollTop = sc.scrollHeight;
+}
+function renderHistory(){
+  const list = $("#historyList");
+  const chats = loadChats().slice().sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+  list.innerHTML = "";
+  const withMsgs = chats.filter(c => c.messages && c.messages.length);
+  if (!withMsgs.length){
+    const empty = document.createElement("div");
+    empty.className = "hist-empty";
+    empty.textContent = "هنوز چتی نداری";
+    list.appendChild(empty);
+    return;
+  }
+  for (const c of withMsgs){
+    const item = document.createElement("div");
+    item.className = "hist-item" + (c.id === activeChatId ? " active" : "");
+    item.dataset.id = c.id;
+    const title = document.createElement("span");
+    title.className = "hist-title";
+    title.textContent = c.title || "چت";
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "hist-del";
+    del.setAttribute("aria-label", "حذف چت");
+    del.textContent = "✕";
+    item.appendChild(title);
+    item.appendChild(del);
+    list.appendChild(item);
+  }
 }
 function renderAll(){
+  const chat = activeChat();
+  const items = chat ? chat.messages : [];
   chatEl.innerHTML = "";
-  for (const item of loadChat()) chatEl.appendChild(renderQA(item));
-  $("#examples").style.display = loadChat().length ? "none" : "flex";
+  for (const item of items) chatEl.appendChild(renderQA(item));
+  $("#welcome").hidden = items.length > 0;
+  renderHistory();
+  scrollChatToBottom();
 }
-$("#clearChat").addEventListener("click", () => {
-  if (!loadChat().length) return;
-  if (!confirm("گفتگو پاک شود؟")) return;
-  localStorage.removeItem(CHAT_LS);
-  renderAll();
+$("#historyList").addEventListener("click", (e) => {
+  const item = e.target.closest ? e.target.closest(".hist-item") : null;
+  if (!item) return;
+  const id = item.dataset.id;
+  const del = e.target.closest ? e.target.closest(".hist-del") : null;
+  if (del){ deleteChat(id); return; }
+  openChat(id);
 });
+$("#newChatBtn").addEventListener("click", () => {
+  const cur = activeChat();
+  if (!cur || !cur.messages.length){ closeSidebarMobile(); renderAll(); return; }
+  newChat();
+  renderAll();
+  closeSidebarMobile();
+  if (!window.matchMedia("(max-width: 768px)").matches) qEl.focus();
+});
+$("#menuBtn").addEventListener("click", () => {
+  if (window.matchMedia("(max-width: 768px)").matches){
+    document.body.classList.toggle("sidebar-open");
+  } else {
+    document.body.classList.toggle("sidebar-hidden");
+  }
+});
+$("#closeSidebarBtn").addEventListener("click", closeSidebarMobile);
+$("#sidebarBackdrop").addEventListener("click", closeSidebarMobile);
 
 function showError(container, message, question){
   container.innerHTML =
@@ -526,12 +764,15 @@ async function ask(question){
     return;
   }
   busy = true; sendBtn.disabled = true;
+  let chat = activeChat();
+  if (!chat) chat = newChat();
   const wrap = document.createElement("div");
   wrap.className = "qa";
   wrap.innerHTML = '<div class="q">' + escapeHtml(question) + "</div>" +
     '<div class="a"><p class="loading">در حال جستجو در منابع معتبر پزشکی و علمی<i>.</i><i>.</i><i>.</i></p></div>';
-  chatEl.prepend(wrap);
-  $("#examples").style.display = "none";
+  chatEl.appendChild(wrap);
+  $("#welcome").hidden = true;
+  scrollChatToBottom();
   try {
     const body = { question };
     const profile = loadProfile();
@@ -553,10 +794,14 @@ async function ask(question){
       return;
     }
     const item = { q: question, a: data.answer, sources: data.sources || [], grounded: data.grounded !== false };
-    const items = loadChat();
-    items.unshift(item);
-    saveChat(items);
+    chat.messages.push(item);
+    chat.messages = chat.messages.slice(-20);
+    if (!chat.title || chat.title === "چت جدید") chat.title = chatTitle(question);
+    chat.updatedAt = Date.now();
+    saveActiveChat(chat);
     wrap.replaceWith(renderQA(item));
+    renderHistory();
+    scrollChatToBottom();
   } catch (e){
     console.error(e);
     showError(wrap, "ارتباط برقرار نشد. اتصال اینترنت را بررسی کنید و دوباره امتحان کنید.", question);
@@ -583,6 +828,8 @@ qEl.addEventListener("keydown", (e) => {
 document.querySelectorAll("#examples button").forEach(b =>
   b.addEventListener("click", () => ask(b.dataset.q)));
 
+migrateOldChat();
+startFreshChat();
 renderAll();
 </script>
 </body>
