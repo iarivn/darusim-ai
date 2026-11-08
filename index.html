@@ -10,6 +10,7 @@
   @font-face{font-family:'AbarHigh';src:url('fonts/AbarHigh-Bold.woff') format('woff');font-weight:700;font-display:swap}
   @font-face{font-family:'AbarHigh';src:url('fonts/AbarHigh-ExtraBold.woff') format('woff');font-weight:800;font-display:swap}
   *{box-sizing:border-box;margin:0;padding:0}
+  [hidden]{display:none!important}
   :root{
     --bg:#FBF6EC; --ink:#1E2A38; --muted:#5E6B7A; --faint:#9AA7B4;
     --line:#E9E2D3; --card:#FFFFFF; --accent:#5B9BD5; --accent-soft:#E1F0FA;
@@ -23,7 +24,14 @@
   }
   main{max-width:640px;margin:0 auto;padding:28px 20px 64px}
 
-  header{margin-bottom:28px}
+  header{position:relative;margin-bottom:28px}
+  .profile-icon-btn{
+    position:absolute;top:0;left:0;width:44px;height:44px;border-radius:50%;
+    border:1px solid var(--line);background:var(--card);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .profile-icon-btn:hover{border-color:var(--accent)}
+  .profile-icon-btn svg{width:24px;height:24px;display:block}
   h1{font-size:26px;font-weight:800;line-height:1.4;letter-spacing:-.01em}
   header p{color:var(--muted);font-size:14px;line-height:1.8;margin-top:2px}
 
@@ -47,12 +55,16 @@
   }
   #examples button:hover{border-color:var(--accent);color:var(--accent)}
 
-  .profile-btn{
-    background:none;border:1px solid var(--line);border-radius:999px;
-    color:var(--muted);font:inherit;font-size:13.5px;padding:6px 14px;cursor:pointer;
-    margin-bottom:20px;
+  #femaleSection{
+    border:1px solid var(--line);border-radius:12px;background:var(--bg);
+    padding:4px 16px 16px;margin-top:16px;
   }
-  .profile-btn:hover{border-color:var(--accent);color:var(--accent)}
+  #femaleSection h3{font-size:16px;font-weight:700;margin-top:10px}
+  #profilePanel .ovarian-checks label{
+    display:flex;align-items:center;gap:8px;margin:8px 0;
+    font-size:14.5px;color:var(--ink);cursor:pointer;
+  }
+  #profilePanel .ovarian-checks input{width:auto;accent-color:var(--accent)}
   #profilePanel{
     background:var(--card);border:1px solid var(--line);border-radius:14px;
     padding:18px 20px;margin-bottom:20px;
@@ -73,6 +85,21 @@
   #saveProfile{border:none;background:var(--accent);color:#fff;font-weight:700}
   #deleteProfile,#closeProfile{background:none;border:1px solid var(--line);color:var(--muted)}
   #profileSaved{font-size:13.5px;color:var(--accent);margin-top:12px}
+
+  .onboard-overlay{
+    position:fixed;inset:0;background:rgba(30,42,56,.45);z-index:50;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  .onboard-card{
+    background:var(--card);border:1px solid var(--line);border-radius:18px;
+    max-width:420px;width:100%;padding:24px;text-align:center;
+  }
+  .onboard-card h2{font-size:20px;font-weight:800;margin-bottom:8px}
+  .onboard-card p{font-size:15px;color:var(--muted);line-height:1.9;margin-bottom:6px}
+  .onboard-actions{display:flex;gap:8px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+  .onboard-actions button{border-radius:999px;font:inherit;font-size:14.5px;padding:10px 22px;cursor:pointer}
+  #onboardGo{border:none;background:var(--accent);color:#fff;font-weight:700}
+  #onboardLater{background:none;border:1px solid var(--line);color:var(--muted)}
 
   .qa{margin-top:28px}
   .q{font-weight:700;font-size:18px;line-height:1.8;margin-bottom:10px}
@@ -115,13 +142,33 @@
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="icon-person-neutral" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="7.5" r="3.5"/>
+      <path d="M4.5 20.5c.8-3.8 3.8-5.5 7.5-5.5s6.7 1.7 7.5 5.5"/>
+    </symbol>
+    <symbol id="icon-person-male" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="7.5" r="3.5"/>
+      <path d="M8.7 6.4c.6-1.9 1.9-2.9 3.3-2.9s2.7 1 3.3 2.9"/>
+      <path d="M4.5 20.5c.8-3.8 3.8-5.5 7.5-5.5s6.7 1.7 7.5 5.5"/>
+    </symbol>
+    <symbol id="icon-person-female" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="7.5" r="3.5"/>
+      <path d="M8.6 6.3c-1.6 1.6-2.1 4.2-1.9 7.2"/>
+      <path d="M15.4 6.3c1.6 1.6 2.1 4.2 1.9 7.2"/>
+      <path d="M4.5 20.5c.8-3.8 3.8-5.5 7.5-5.5s6.7 1.7 7.5 5.5"/>
+    </symbol>
+  </defs>
+</svg>
 <main>
   <header>
+    <button type="button" class="profile-icon-btn" id="profileBtn" aria-label="پروفایل من">
+      <svg aria-hidden="true"><use id="profileIconUse" href="#icon-person-neutral"/></svg>
+    </button>
     <h1>پناه</h1>
     <p>دستیار دارویی — پناه سؤال‌های دارویی‌ات</p>
   </header>
-
-  <button type="button" class="profile-btn" id="profileBtn">پروفایل من</button>
 
   <div id="profilePanel" hidden>
     <h2>پروفایل من</h2>
@@ -156,6 +203,36 @@
     </select>
     <label for="pf-addiction-note">توضیح اعتیاد (اختیاری)</label>
     <input type="text" id="pf-addiction-note" placeholder="مثلاً روزی یک پاکت سیگار">
+    <div id="femaleSection" hidden>
+      <h3>سلامت زنان</h3>
+      <p class="profile-note">این بخش فقط وقتی جنسیت «زن» انتخاب شده باشد نمایش داده می‌شود و در شخصی‌سازی جواب‌ها (به‌ویژه درباره‌ی مسکن‌ها و داروهای هورمونی) استفاده می‌شود.</p>
+      <label>بیماری‌های تخمدان (در صورت وجود)</label>
+      <div class="ovarian-checks">
+        <label><input type="checkbox" class="pf-ovarian" value="تخمدان پلی‌کیستیک"> تخمدان پلی‌کیستیک (PCOS)</label>
+        <label><input type="checkbox" class="pf-ovarian" value="کیست تخمدان"> کیست تخمدان</label>
+        <label><input type="checkbox" class="pf-ovarian" value="اندومتریوز"> اندومتریوز</label>
+        <label><input type="checkbox" class="pf-ovarian" value="نارسایی زودرس تخمدان"> نارسایی زودرس تخمدان</label>
+        <label><input type="checkbox" class="pf-ovarian" value="توده یا تومور تخمدان"> توده یا تومور تخمدان</label>
+      </div>
+      <label for="pf-ovarian-other">سایر بیماری‌های تخمدان</label>
+      <input type="text" id="pf-ovarian-other" placeholder="مثلاً ...">
+      <label for="pf-bleeding">میزان خونریزی در آخرین پریود</label>
+      <select id="pf-bleeding">
+        <option value="">انتخاب کنید</option>
+        <option value="کم">کم</option>
+        <option value="متوسط">متوسط</option>
+        <option value="زیاد">زیاد</option>
+        <option value="خیلی زیاد">خیلی زیاد</option>
+      </select>
+      <label for="pf-pain">درد در آخرین پریود</label>
+      <select id="pf-pain">
+        <option value="">انتخاب کنید</option>
+        <option value="بدون درد">بدون درد</option>
+        <option value="خفیف">خفیف</option>
+        <option value="متوسط">متوسط</option>
+        <option value="شدید">شدید</option>
+      </select>
+    </div>
     <div class="profile-actions">
       <button type="button" id="saveProfile">ذخیره پروفایل</button>
       <button type="button" id="deleteProfile">حذف پروفایل</button>
@@ -180,6 +257,17 @@
   <p class="foot">این اپلیکیشن صرفاً یک دستیار در ابتدای تصمیم‌گیری برای مصرف دارو، ترک دارو یا کسب اطلاعات درباره‌ی داروها و مسائل پزشکی است و به هیچ عنوان نمی‌تواند تنها مرجع تصمیم‌گیری شما در این موضوع باشد. حتماً تمام نتایج را با یک پزشک — حتی به‌صورت تلفنی یا متنی — در میان بگذارید و از او تأیید بگیرید.<br><button type="button" id="clearChat">پاک کردن گفتگو</button></p>
 </main>
 
+<div class="onboard-overlay" id="onboardOverlay" hidden>
+  <div class="onboard-card" role="dialog" aria-modal="true" aria-labelledby="onboardTitle">
+    <h2 id="onboardTitle">پروفایلت رو کامل کن</h2>
+    <p>برای اینکه جواب‌ها دقیقاً مال خودت باشه، پروفایلت رو کامل کن: سن، وزن، داروهایی که مصرف می‌کنی، بیماری‌های زمینه‌ای — و برای خانم‌ها، سلامت تخمدان و وضعیت آخرین پریود. همه‌ی این‌ها فقط روی همین دستگاه ذخیره می‌شه و تکمیلش کمتر از یک دقیقه طول می‌کشه.</p>
+    <div class="onboard-actions">
+      <button type="button" id="onboardGo">تکمیل پروفایل</button>
+      <button type="button" id="onboardLater">بعداً</button>
+    </div>
+  </div>
+</div>
+
 <script>
 "use strict";
 // آدرس ورکر Cloudflare
@@ -198,9 +286,14 @@ function profileSummary(p){
   if (p.age) bits.push(p.age + " ساله");
   return bits.join("، ");
 }
-function refreshProfileBtn(){
+function refreshProfileIcon(){
   const p = loadProfile();
-  $("#profileBtn").textContent = p && Object.keys(p).length ? "ویرایش پروفایل" : "پروفایل من";
+  const g = p && p.gender;
+  const id = g === "مرد" ? "#icon-person-male" : g === "زن" ? "#icon-person-female" : "#icon-person-neutral";
+  $("#profileIconUse").setAttribute("href", id);
+}
+function toggleFemaleSection(){
+  $("#femaleSection").hidden = $("#pf-gender").value !== "زن";
 }
 function fillProfileForm(){
   const p = loadProfile() || {};
@@ -214,6 +307,14 @@ function fillProfileForm(){
   $("#pf-history").value = p.history || "";
   $("#pf-addiction").value = p.addiction || "";
   $("#pf-addiction-note").value = p.addictionNote || "";
+  toggleFemaleSection();
+  const ovBoxes = [...document.querySelectorAll(".pf-ovarian")];
+  const ovParts = (p.ovarian || "").split("،").map(s => s.trim()).filter(Boolean);
+  const knownOv = ovBoxes.map(c => c.value);
+  ovBoxes.forEach(c => { c.checked = ovParts.includes(c.value); });
+  $("#pf-ovarian-other").value = ovParts.filter(v => !knownOv.includes(v)).join("، ");
+  $("#pf-bleeding").value = p.bleeding || "";
+  $("#pf-pain").value = p.pain || "";
   $("#profileSaved").hidden = true;
 }
 function readProfileForm(){
@@ -237,6 +338,15 @@ function readProfileForm(){
   if (history) p.history = history;
   if (addiction) p.addiction = addiction;
   if (addictionNote) p.addictionNote = addictionNote;
+  if ($("#pf-gender").value === "زن"){
+    const ov = [];
+    document.querySelectorAll(".pf-ovarian:checked").forEach(c => ov.push(c.value));
+    const ovOther = $("#pf-ovarian-other").value.trim();
+    if (ovOther) ov.push(ovOther);
+    if (ov.length) p.ovarian = ov.join("، ");
+    if ($("#pf-bleeding").value) p.bleeding = $("#pf-bleeding").value;
+    if ($("#pf-pain").value) p.pain = $("#pf-pain").value;
+  }
   return p;
 }
 $("#profileBtn").addEventListener("click", () => {
@@ -244,18 +354,38 @@ $("#profileBtn").addEventListener("click", () => {
   $("#profilePanel").hidden = !$("#profilePanel").hidden;
 });
 $("#closeProfile").addEventListener("click", () => { $("#profilePanel").hidden = true; });
+$("#pf-gender").addEventListener("change", toggleFemaleSection);
 $("#saveProfile").addEventListener("click", () => {
   localStorage.setItem(PROFILE_LS, JSON.stringify(readProfileForm()));
   $("#profileSaved").hidden = false;
-  refreshProfileBtn();
+  refreshProfileIcon();
 });
 $("#deleteProfile").addEventListener("click", () => {
   if (!confirm("پروفایل حذف شود؟")) return;
   localStorage.removeItem(PROFILE_LS);
   fillProfileForm();
-  refreshProfileBtn();
+  refreshProfileIcon();
 });
-refreshProfileBtn();
+refreshProfileIcon();
+
+// پاپ‌آپ آنبوردینگ: فقط وقتی هنوز پروفایلی ذخیره نشده
+(function(){
+  const saved = loadProfile();
+  let dismissed = null;
+  try { dismissed = sessionStorage.getItem("panah-onboard-dismissed"); } catch(e){}
+  if ((saved && Object.keys(saved).length) || dismissed) return;
+  $("#onboardOverlay").hidden = false;
+})();
+$("#onboardGo").addEventListener("click", () => {
+  $("#onboardOverlay").hidden = true;
+  fillProfileForm();
+  $("#profilePanel").hidden = false;
+  $("#profilePanel").scrollIntoView({ behavior: "smooth", block: "start" });
+});
+$("#onboardLater").addEventListener("click", () => {
+  $("#onboardOverlay").hidden = true;
+  try { sessionStorage.setItem("panah-onboard-dismissed", "1"); } catch(e){}
+});
 
 let busy = false;
 

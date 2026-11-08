@@ -140,10 +140,13 @@ function buildPrompt(question, retrieved, profile) {
     if (profile.meds) lines.push("- داروهای در حال مصرف: " + profile.meds);
     if (profile.history) lines.push("- سابقه مصرف داروها: " + profile.history);
     if (profile.addiction) lines.push("- اعتیاد: " + profile.addiction + (profile.addictionNote ? " (" + profile.addictionNote + ")" : ""));
+    if (profile.ovarian) lines.push("- بیماری‌های تخمدان: " + profile.ovarian);
+    if (profile.bleeding) lines.push("- میزان خونریزی در آخرین پریود: " + profile.bleeding);
+    if (profile.pain) lines.push("- درد در آخرین پریود: " + profile.pain);
     if (lines.length) {
       profileBlock =
         "\n\nپروفایل کاربر:\n" + lines.join("\n") +
-        "\nاگر پروفایل کاربر داده شده، جواب را با آن شخصی‌سازی کن: سن و وزن را در توضیح دوز و عوارض در نظر بگیر؛ تداخل احتمالی با داروهای در حال مصرف را بررسی و هشدار بده؛ بیماری‌های زمینه‌ای و سابقه اعتیاد را در ارزیابی خطرات لحاظ کن؛ در صورت امکان کاربر را با نام صدا بزن. همچنان جواب اطلاعات عمومی است، نه نسخه‌ی شخصی، و برنامه‌ی دقیق با پزشک تنظیم می‌شود.";
+        "\nاگر پروفایل کاربر داده شده، جواب را با آن شخصی‌سازی کن: سن و وزن را در توضیح دوز و عوارض در نظر بگیر؛ تداخل احتمالی با داروهای در حال مصرف را بررسی و هشدار بده؛ بیماری‌های زمینه‌ای و سابقه اعتیاد را در ارزیابی خطرات لحاظ کن؛ اگر کاربر زن است و اطلاعات سلامت زنان (بیماری‌های تخمدان، میزان خونریزی و درد آخرین پریود) داده شده، آن‌ها را در ارزیابی داروها — به‌ویژه مسکن‌ها، داروهای هورمونی و داروهای مؤثر بر خونریزی — لحاظ کن؛ در صورت امکان کاربر را با نام صدا بزن. همچنان جواب اطلاعات عمومی است، نه نسخه‌ی شخصی، و برنامه‌ی دقیق با پزشک تنظیم می‌شود.";
     }
   }
   return (
@@ -165,13 +168,27 @@ function buildPrompt(question, retrieved, profile) {
 function sanitizeProfile(p) {
   if (!p || typeof p !== "object") return null;
   const out = {};
-  const fields = ["name", "age", "gender", "height", "weight", "conditions", "meds", "history", "addiction", "addictionNote"];
+  const fields = ["name", "age", "gender", "height", "weight", "conditions", "meds", "history", "addiction", "addictionNote", "ovarian", "bleeding", "pain"];
   for (const f of fields) {
     const v = p[f];
     if (typeof v === "string" && v.trim()) out[f] = v.trim().slice(0, 200);
     else if (typeof v === "number" && isFinite(v)) out[f] = v;
   }
   return Object.keys(out).length ? out : null;
+}
+
+function dedupeDisclaimer(answer) {
+  // The prompt already tells the model to end with DISCLAIMER, but the model
+  // sometimes writes a paraphrased disclaimer instead ("فقط جنبه آموزشی
+  // دارد"، "جایگزین نظر پزشک نیست"...). The old substring check only caught
+  // the exact wording, so a paraphrase plus the appended canonical line
+  // produced two disclaimers. Strip every disclaimer-like sentence first,
+  // then the caller appends the canonical line exactly once.
+  let out = answer.split(DISCLAIMER).join(" ");
+  const disclaimerLike =
+    /[^.!؟\n]*(صرفاً آموزشی|صرفا آموزشی|جنبه‌ی? آموزشی|جایگزین نظر پزشک|جایگزین مشاوره‌ی? پزشکی|جایگزین توصیه‌ی? پزشک|تنها مرجع تصمیم|صرفاً یک دستیار)[^.!؟\n]*[.!؟\n]?/g;
+  out = out.replace(disclaimerLike, "");
+  return out.replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
 function rateLimited(ip) {
@@ -235,7 +252,8 @@ export default {
           answer = answer.slice(GENERAL_LABEL.length).replace(/^\s+/, "");
         }
       }
-      if (!answer.includes("صرفاً آموزشی")) answer += "\n\n" + DISCLAIMER;
+      answer = dedupeDisclaimer(answer);
+      answer += "\n\n" + DISCLAIMER;
       return json({ answer, sources: ranked.map((d) => d.fa), grounded }, 200, origin, allowed);
     } catch (e) {
       console.error(e);
